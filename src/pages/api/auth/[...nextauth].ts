@@ -21,29 +21,35 @@ export default NextAuth({
         // O Faunadb possui vários métodos, como if, map, se existe, etc.
         // Sintaxe FQL
         await fauna.query(
-        //  q.If(
-        //    q.Not(
-        //      q.Match(
-        //        q.Index('user_by_email'),
-        //        q.Casefold(user.email)
-        //      )
-        //    ),
+          // Se 
+         q.If(
+           //não existe o usuário
+           q.Not(
+             q.Match(
+               // procurar o usuário de pelo índice
+               q.Index('user_by_email'),
+               q.Casefold(user.email)
+             )
+           ),
+           // Insere usuário se não existir
            q.Create(
             q.Collection('users'), // Nome da tabela
             { data: { email } } // Informação que desejo guardar
+          ),
+          // Busca usuário se existir
+          q.Get(
+            q.Match(
+              q.Index('user_by_email'),
+               q.Casefold(user.email)
+            )
           )
-        //   q.Get(
-        //     q.Match(
-        //       q.Index('user_by_email'),
-        //        q.Casefold(user.email)
-        //     )
-        //   )
-        //  )
+         )
         )
         //return true
       } 
       finally {
-        return true // Evitará que o usuário faça login se a aplicação não interagir com o BD
+        return true // Evitará que o usuário faça login se a aplicação não 
+        //interagir com o BD
       }
     },
   }
