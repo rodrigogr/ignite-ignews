@@ -35,7 +35,8 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
                 email: session.user.email,
             })
 
-         // Salva o usuário
+         // Atualiza o usuário no faunadb com as inserindo a informação
+         // stripe_customer_id
             await fauna.query(
                 q.Update(
                     q.Ref(q.Collection('users'), user.ref.id ),
@@ -53,7 +54,8 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         const stripeCheckoutSession = await stripe.checkout.sessions.create({
             customer: customerId, // Quem está comprando o serviço
             payment_method_types: ['card'], // Formas de pagamento
-            //ou 'auto' onde configuro no painel do stripe
+            billing_address_collection: 'required', // 'required' Endereço 
+            //obrigatório ou 'auto' onde configuro no painel do stripe
             line_items: [
                 // items no carrinho
                 { price: 'price_1JRikhFqyLyR3nu37DK3IDmG', quantity: 1}
