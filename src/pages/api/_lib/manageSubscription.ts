@@ -6,6 +6,7 @@ import { stripe } from "../../../services/stripe";
 export async function saveSubscription(
     subscriptionId: string,
     customerId: string,
+    createAction = false,
 ) {
     // Buscar o usuário no basco do FaunaDb com o ID { customerId }
     // Salvar os dados da subscription no FaunaDB
@@ -33,12 +34,30 @@ export async function saveSubscription(
         status: subscription.status,
         price_id: subscription.items.data[0].price.id, // 1ª posição pq o 
         //usuário vai comprar um produto por vez
-
     }
-    await fauna.query(
-        q.Create(
-            q.Collection('subscriptions'),
-            { data: subscriptionData }
+    if (createAction) {
+        await fauna.query(
+            q.Create(
+                q.Collection('subscriptions'),
+                { data: subscriptionData }
+            )
         )
-    )
+    } else {
+        await fauna.query(
+            // Update() ou Replace() atualiza um registro no fauna
+            // Update() atualiza determinados campos Replace() substitui tudo
+            q.Replace(
+                q.Select(
+                    "ref",
+                    q.Get(
+                        q.Match(
+                            q.Index('subscription_by_id'),
+                            subscriptionId
+                        )
+                    )
+                ),
+                { data: subscriptionData } // Quais dados quero atualizar
+            )
+        )
+    }
 }
