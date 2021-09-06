@@ -28,6 +28,13 @@ export const config = {
 }
 // Determinar quais eventos são relevantes para nós.
 const relevantEvents = new Set([
+    // O checkout.session.completed e customer.subscription.created acabam 
+    // criando um cliente cada. Gerando assim dois registros iguais. 
+    // Para resolver isso existem duas formas.
+    // 1ª Se a única forma de assinar nossa aplicação for em nosso site, não
+    // precisamos ouvir o evento customer.subscription.created.
+    // 2ª Se existir mais formas de assinar o produto teremos que fazer um if na
+    //query do fauna, se existir não cria.
     'checkout.session.completed',
     'customer.subscription.created',
     'customer.subscription.updated',
@@ -53,7 +60,6 @@ export default async(req: NextApiRequest, res: NextApiResponse) => {
             try {
                 switch (type) {
                     // As três verificações caem na mesma lógica a seguir 
-                    case 'customer.subscription.created':
                     case 'customer.subscription.updated':
                     case 'customer.subscription.deleted':
 
@@ -63,7 +69,7 @@ export default async(req: NextApiRequest, res: NextApiResponse) => {
                             subscription.id,
                             subscription.customer.toString(),
                             // True caso seja customer.subscription.created
-                            type === 'customer.subscription.created'
+                            false
                         )
 
                         break;
