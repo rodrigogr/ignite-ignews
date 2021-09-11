@@ -1,7 +1,7 @@
 import { RichText } from 'prismic-dom';
 import { getPrismicClient } from "../../../services/prismic";
 import Head from 'next/head';
-import { GetStaticProps } from "next";
+import { GetStaticPaths, GetStaticProps } from 'next';
 import styles from '../post.module.scss';
 import Link from 'next/link';
 import { useSession } from 'next-auth/client';
@@ -52,9 +52,14 @@ export default function PostPreview({post}: PostPreviewProps){
     )
 }
 
-export const getStaticPaths = () => {
+//Retorna, nesse caso, quais previews de posts quero gerar durante a build
+export const getStaticPaths: GetStaticPaths= () => {
     return {
-        paths: [],
+        paths: [
+            {params: {
+                slug: 'como-renomear-varios-arquivos-de-uma-vez-usando-o-terminal'
+            }}
+        ],
         fallback: 'blocking'
     }
 }
@@ -77,6 +82,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
         props: {
             post
         },
+        // Todo getStaticProps é importante que retornemos o valor redirect.
         redirect: 60 * 30 // 30min será o tempo que o conteúdo será atualizado
     }
 }
